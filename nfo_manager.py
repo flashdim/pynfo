@@ -298,29 +298,29 @@ def main():
 
         stats["processed"] += 1
         print(f"\n[{stats['processed']}] {nfo_file.name}")
+        failed = False
 
         if args.tag == "general":
             success, message = check_studio_tag(filename_base, str(nfo_file), fix=args.fix)
             print(f"  {message}")
-            if success:
-                stats["passed"] += 1
-            else:
-                stats["failed"] += 1
+            if not success:
+                failed = True
 
             success, message = check_year_tag(filename_base, str(nfo_file), fix=args.fix)
             print(f"  {message}")
-            if success:
-                stats["passed"] += 1
-            else:
-                stats["failed"] += 1
+            if not success:
+                failed = True
         else:
             success, messages = process_nfo_file(str(nfo_file), args.tag, fix=args.fix)
             for msg in messages:
                 print(f"  {msg}")
-            if success:
-                stats["passed"] += 1
-            else:
-                stats["failed"] += 1
+            if not success:
+                failed = True
+
+        if failed:
+            stats["failed"] += 1
+        else:
+            stats["passed"] += 1
 
     # Print detailed report
     print(f"\n{'='*80}")
