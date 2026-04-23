@@ -90,6 +90,34 @@ def extract_region_code(tag):
     }
     return region_mapping.get(tag)
 
+def insert_element_after_runtime(root, tag_name, tag_value):
+    """
+    Insert a new element after the runtime element.
+    If the element already exists, update it instead.
+    """
+    # Find if element already exists
+    existing = root.find(tag_name)
+    if existing is not None:
+        existing.text = tag_value
+        return existing
+    
+    # Find runtime element
+    runtime_element = root.find("runtime")
+    
+    if runtime_element is not None:
+        # Find the index of runtime element
+        runtime_index = list(root).index(runtime_element)
+        # Insert new element after runtime
+        new_element = ET.Element(tag_name)
+        new_element.text = tag_value
+        root.insert(runtime_index + 1, new_element)
+    else:
+        # If no runtime, just append to root
+        new_element = ET.SubElement(root, tag_name)
+        new_element.text = tag_value
+    
+    return new_element
+
 def process_nfo_file(nfo_path, tag, fix=False):
     """
     Validate and optionally fix tags in an NFO file.
@@ -107,8 +135,7 @@ def process_nfo_file(nfo_path, tag, fix=False):
             
             if not genre_found:
                 if fix:
-                    genre = ET.SubElement(root, "genre")
-                    genre.text = platform_value
+                    insert_element_after_runtime(root, "genre", platform_value)
                     tree.write(nfo_path, encoding='utf-8', xml_declaration=True)
                     messages.append(f"✓ FIXED: Added <genre>{platform_value}</genre>")
                     stats["fixed"] += 1
@@ -126,9 +153,7 @@ def process_nfo_file(nfo_path, tag, fix=False):
             
             if year_element is None or year_element.text != year_value:
                 if fix and year_value:
-                    if year_element is None:
-                        year_element = ET.SubElement(root, "year")
-                    year_element.text = year_value
+                    insert_element_after_runtime(root, "year", year_value)
                     tree.write(nfo_path, encoding='utf-8', xml_declaration=True)
                     messages.append(f"✓ FIXED: Set <year>{year_value}</year>")
                     stats["fixed"] += 1
@@ -146,9 +171,7 @@ def process_nfo_file(nfo_path, tag, fix=False):
             
             if country_element is None or country_element.text != region_code:
                 if fix:
-                    if country_element is None:
-                        country_element = ET.SubElement(root, "countrycode")
-                    country_element.text = region_code
+                    insert_element_after_runtime(root, "countrycode", region_code)
                     tree.write(nfo_path, encoding='utf-8', xml_declaration=True)
                     messages.append(f"✓ FIXED: Set <countrycode>{region_code}</countrycode>")
                     stats["fixed"] += 1
@@ -181,9 +204,7 @@ def check_studio_tag(filename, nfo_path, fix=False):
         
         if studio_element is None or studio_element.text != studio_name:
             if fix:
-                if studio_element is None:
-                    studio_element = ET.SubElement(root, "studio")
-                studio_element.text = studio_name
+                insert_element_after_runtime(root, "studio", studio_name)
                 tree.write(nfo_path, encoding='utf-8', xml_declaration=True)
                 stats["fixed"] += 1
                 return True, f"✓ FIXED: Set <studio>{studio_name}</studio>"
@@ -232,11 +253,11 @@ def main():
             continue
 
         stats["processed"] += 1
-        print(f"\n[{{stats['processed']}}] {{nfo_file.name}}")
+        print(f"\n[{stats['processed']}] {nfo_file.name}")
 
         if args.tag == "studio":
             success, message = check_studio_tag(filename_base, str(nfo_file), fix=args.fix)
-            print(f"  {{message}}")
+            print(f"  {message}")
             if success:
                 stats["passed"] += 1
             else:
@@ -244,7 +265,7 @@ def main():
         else:
             success, messages = process_nfo_file(str(nfo_file), args.tag, fix=args.fix)
             for msg in messages:
-                print(f"  {{msg}}")
+                print(f"  {msg}")
             if success:
                 stats["passed"] += 1
             else:
@@ -254,12 +275,12 @@ def main():
     print(f"\n{'='*80}")
     print(f"DETAILED REPORT")
     print(f"{'='*80}")
-    print(f"Files processed:  {{stats['processed']}}")
-    print(f"Passed:           {{stats['passed']}}")
-    print(f"Failed:           {{stats['failed']}}")
-    print(f"Fixed:            {{stats['fixed']}}")
+    print(f"Files processed:  {stats['processed']}")
+    print(f"Passed:           {stats['passed']}")
+    print(f"Failed:           {stats['failed']}")
+    print(f"Fixed:            {stats['fixed']}")
     if args.tag == "studio":
-        print(f"Missing studio tag: {{stats['missing_studio']}}")
+        print(f"Missing studio tag: {stats['missing_studio']}")
     print(f"{'='*80}\n")
 
 if __name__ == '__main__':
