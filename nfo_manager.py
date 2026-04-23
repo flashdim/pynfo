@@ -30,8 +30,7 @@ def extract_studio_from_filename(filename):
     Extract studio name from filename pattern: 'by <company> - ' or 'by <company> ('
     Returns the studio name or None if not found.
     """
-    match = re.search(r' by ([^-
-\(]+?)(?:\s*[-\(])', filename)
+    match = re.search(r' by ([^-\(]+?)(?:\s*[-\(])', filename)
     if match:
         return match.group(1).strip()
     return None
