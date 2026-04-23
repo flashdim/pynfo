@@ -113,11 +113,18 @@ def insert_element_after_runtime(root, tag_name, tag_value):
     Insert a new element after the runtime element.
     If the element already exists, update it instead.
     """
-    # Find if element already exists
-    existing = root.find(tag_name)
-    if existing is not None:
-        existing.text = tag_value
-        return existing
+    # Allow multiple <genre> tags
+    if tag_name == "genre":
+        new_element = ET.Element(tag_name)
+        new_element.text = tag_value
+        # Insert after runtime or append
+        runtime_element = root.find("runtime")
+        if runtime_element is not None:
+            runtime_index = list(root).index(runtime_element)
+            root.insert(runtime_index + 1, new_element)
+        else:
+            root.append(new_element)
+        return new_element
 
     # Find runtime element
     runtime_element = root.find("runtime")
@@ -153,6 +160,7 @@ def process_nfo_file(nfo_path, tag, fix=False):
 
             if not genre_found:
                 if fix:
+                    # Always add a new <genre> tag
                     insert_element_after_runtime(root, "genre", platform_value)
                     indent_xml(root)
                     tree.write(nfo_path, encoding='utf-8', xml_declaration=True)
