@@ -23,7 +23,7 @@ def indent_xml(elem, level=0):
             elem.tail = indent_str
 
 # Constants for valid tags
-PLATFORM_TAGS = ["(NES)", "(SNES)", "(N64)", "(NSW)", "(NS2)", "(GB)", "(GBC)", "(GBA)", "(NDS)", "(3DS)", "(Genesis)", "(Saturn)", "(Dreamcast)", "(PSX)", "(PS2)", "(PS3)", "(PS4)", "(PS5)", "(PSP)", "(Vita)", "(XBOX)", "(X360)", "(XB1)", "(XBS)", "(PC)", "(Jaguar)", "(NeoGeo)", "(Arcade)", "(3DO)"]
+PLATFORM_TAGS = ["(NES)", "(SNES)", "(N64)", "(GCN)", "(NSW)", "(NS2)", "(GB)", "(GBC)", "(GBA)", "(NDS)", "(3DS)", "(Genesis)", "(Saturn)", "(Dreamcast)", "(PSX)", "(PS2)", "(PS3)", "(PS4)", "(PS5)", "(PSP)", "(Vita)", "(XBOX)", "(X360)", "(XB1)", "(XBS)", "(PC)", "(Jaguar)", "(NeoGeo)", "(Arcade)", "(3DO)"]
 YEAR_TAGS = ["(19XX)", "(20XX)"]
 REGION_TAGS = ["(U)", "(UK)", "(A)", "(NZ)", "(E)", "(K)", "(J)"]
 
@@ -59,6 +59,7 @@ def get_platform_from_tag(tag):
         "(NES)": "Nintendo NES",
         "(SNES)": "Nintendo SNES",
         "(N64)": "Nintendo 64",
+        "(GCN)": "Nintendo GameCube",
         "(NSW)": "Nintendo Switch",
         "(NS2)": "Nintendo Switch 2",
         "(GB)": "Nintendo Game Boy",
