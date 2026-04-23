@@ -41,6 +41,7 @@ stats = {
     "failed": 0,
     "fixed": 0,
     "missing_studio": 0,
+    "missing_year": 0,
 }
 
 def extract_studio_from_filename(filename):
@@ -89,9 +90,9 @@ def get_platform_from_tag(tag):
     }
     return platform_mapping.get(tag)
 
-def extract_year_from_tag(tag):
-    """Extract year value from year tag."""
-    match = re.search(r'\((\d{4})\)', tag)
+def extract_year_from_filename(filename):
+    """Extract year value from year in filename."""
+    match = re.search(r'\((\d{4})\)', filename)
     if match:
         return match.group(1)
     return None
@@ -175,25 +176,6 @@ def process_nfo_file(nfo_path, tag, fix=False):
                 messages.append(f"✓ FOUND: <genre>{platform_value}</genre>")
                 return True, messages
 
-        elif tag in YEAR_TAGS or re.match(r'\(\d{4}\)', tag):
-            year_value = extract_year_from_tag(tag)
-            year_element = root.find("year")
-
-            if year_element is None or year_element.text != year_value:
-                if fix and year_value:
-                    insert_element_after_runtime(root, "year", year_value)
-                    indent_xml(root)
-                    tree.write(nfo_path, encoding='utf-8', xml_declaration=True)
-                    messages.append(f"✓ FIXED: Set <year>{year_value}</year>")
-                    stats["fixed"] += 1
-                    return True, messages
-                else:
-                    messages.append(f"✗ MISSING: <year>{year_value}</year>")
-                    return False, messages
-            else:
-                messages.append(f"✓ FOUND: <year>{year_value}</year>")
-                return True, messages
-
         elif tag in REGION_TAGS:
             region_code = extract_region_code(tag)
             country_element = root.find("countrycode")
@@ -247,16 +229,47 @@ def check_studio_tag(filename, nfo_path, fix=False):
     except Exception as e:
         return False, f"✗ ERROR: {str(e)}"
 
+def check_year_tag(filename, nfo_path, fix=False):
+    """
+    Check for '(YYYY)' pattern in filename and ensure <year> tag in NFO.
+    Returns True if valid, False otherwise.
+    """
+    year_value = extract_year_from_filename(filename)
+
+    if not year_value:
+        stats["missing_year"] += 1
+        return False, f"✗ MISSING YEAR TAG: No '(YYYY)' pattern found in filename"
+
+    try:
+        tree = ET.parse(nfo_path)
+        root = tree.getroot()
+        year_element = root.find("year")
+
+        if year_element is None or year_element.text != year_value:
+            if fix:
+                insert_element_after_runtime(root, "year", year_value)
+                indent_xml(root)
+                tree.write(nfo_path, encoding='utf-8', xml_declaration=True)
+                stats["fixed"] += 1
+                return True, f"✓ FIXED: Set <year>{year_value}</year>"
+            else:
+                return False, f"✗ MISSING: <year>{year_value}</year>"
+        else:
+            return True, f"✓ FOUND: <year>{year_value}</year>"
+
+    except Exception as e:
+        return False, f"✗ ERROR: {str(e)}"
+
 def main():
     parser = argparse.ArgumentParser(description='Manage Jellyfin .nfo files.')
-    parser.add_argument('-t', '--tag', help='Tag to validate or update (e.g., "(SNES)", "(2022)", "(U)"). Use "studio" to check studio tags.')
+    parser.add_argument('-t', '--tag', help='Tag to validate or update (e.g., "(SNES)", "(2022)", "(U)"). Omit to check only general tags')
     parser.add_argument('--fix', action='store_true', help='Automatically fix missing tags.')
     parser.add_argument('folder', help='Path to the folder containing .nfo files.')
     args = parser.parse_args()
 
-    # If no tag specified, check studio tags for all files
+    # If no tag specified, check general tags for all files
     if not args.tag:
-        args.tag = "studio"
+        args.tag = "general"
 
     folder_path = Path(args.folder)
     if not folder_path.is_dir():
@@ -279,15 +292,22 @@ def main():
     for nfo_file in sorted(nfo_files):
         filename_base = nfo_file.stem  # filename without .nfo extension
 
-        # Filter by tag if it's in the filename (except for studio)
-        if args.tag != "studio" and args.tag not in filename_base:
+        # Filter by tag if it's in the filename (except for general)
+        if args.tag != "general" and args.tag not in filename_base:
             continue
 
         stats["processed"] += 1
         print(f"\n[{stats['processed']}] {nfo_file.name}")
 
-        if args.tag == "studio":
+        if args.tag == "general":
             success, message = check_studio_tag(filename_base, str(nfo_file), fix=args.fix)
+            print(f"  {message}")
+            if success:
+                stats["passed"] += 1
+            else:
+                stats["failed"] += 1
+
+            success, message = check_year_tag(filename_base, str(nfo_file), fix=args.fix)
             print(f"  {message}")
             if success:
                 stats["passed"] += 1
@@ -310,8 +330,9 @@ def main():
     print(f"Passed:           {stats['passed']}")
     print(f"Failed:           {stats['failed']}")
     print(f"Fixed:            {stats['fixed']}")
-    if args.tag == "studio":
-        print(f"Missing studio tag: {stats['missing_studio']}")
+    if args.tag == "general":
+        print(f"Missing studio:   {stats['missing_studio']}")
+        print(f"Missing year:     {stats['missing_year']}")
     print(f"{'='*80}\n")
 
 if __name__ == '__main__':
