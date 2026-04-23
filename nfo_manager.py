@@ -23,7 +23,7 @@ def indent_xml(elem, level=0):
             elem.tail = indent_str
 
 # Constants for valid tags
-PLATFORM_TAGS = ["(NES)", "(SNES)", "(N64)", "(NSW)", "(NS2)", "(GB)", "(GBC)", "(GBA)", "(NDS)", "(3DS)", "(Genesis)", "(Saturn)", "(Dreamcast)", "(PSX)", "(PS2)", "(PS3)", "(PS4)", "(PS5)", "(PSP)", "(Vita)", "(XBOX)", "(X360)", "(XB1)", "(XSX|S)", "(PC)", "(Jaguar)", "(NeoGeo)", "(Arcade)", "(3DO)"]
+PLATFORM_TAGS = ["(NES)", "(SNES)", "(N64)", "(NSW)", "(NS2)", "(GB)", "(GBC)", "(GBA)", "(NDS)", "(3DS)", "(Genesis)", "(Saturn)", "(Dreamcast)", "(PSX)", "(PS2)", "(PS3)", "(PS4)", "(PS5)", "(PSP)", "(Vita)", "(XBOX)", "(X360)", "(XB1)", "(XBS)", "(PC)", "(Jaguar)", "(NeoGeo)", "(Arcade)", "(3DO)"]
 YEAR_TAGS = ["(19XX)", "(20XX)"]
 REGION_TAGS = ["(U)", "(UK)", "(A)", "(NZ)", "(E)", "(K)", "(J)"]
 
@@ -79,7 +79,7 @@ def get_platform_from_tag(tag):
         "(XBOX)": "Microsoft Xbox",
         "(X360)": "Microsoft Xbox 360",
         "(XB1)": "Microsoft Xbox One",
-        "(XSX|S)": "Microsoft Xbox Series X|S",
+        "(XBS)": "Microsoft Xbox Series X|S",
         "(PC)": "PC",
         "(Jaguar)": "Atari Jaguar",
         "(NeoGeo)": "SNK NeoGeo",
