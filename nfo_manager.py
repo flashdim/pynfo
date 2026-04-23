@@ -79,7 +79,7 @@ def get_platform_from_tag(tag):
         "(XBOX)": "Microsoft Xbox",
         "(X360)": "Microsoft Xbox 360",
         "(XB1)": "Microsoft Xbox One",
-        "(XBS)": "Microsoft Xbox Series X|S",
+        "(XBS)": "Microsoft Xbox Series X｜S",
         "(PC)": "PC",
         "(Jaguar)": "Atari Jaguar",
         "(NeoGeo)": "SNK NeoGeo",
