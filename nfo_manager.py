@@ -4,6 +4,24 @@ import xml.etree.ElementTree as ET
 import argparse
 from pathlib import Path
 
+def indent_xml(elem, level=0):
+    """
+    Add proper indentation and newlines to XML elements for readability.
+    """
+    indent_str = "\n" + level * "  "
+    if len(elem):
+        if not elem.text or not elem.text.strip():
+            elem.text = indent_str + "  "
+        if not elem.tail or not elem.tail.strip():
+            elem.tail = indent_str
+        for child in elem:
+            indent_xml(child, level + 1)
+        if not child.tail or not child.tail.strip():
+            child.tail = indent_str
+    else:
+        if level and (not elem.tail or not elem.tail.strip()):
+            elem.tail = indent_str
+
 # Constants for valid tags
 PLATFORM_TAGS = ["(NES)", "(SNES)", "(N64)", "(NSW)", "(NS2)", "(GB)", "(GBC)", "(GBA)", "(NDS)", "(3DS)", "(Genesis)", "(Saturn)", "(Dreamcast)", "(PSX)", "(PS2)", "(PS3)", "(PS4)", "(PS5)", "(PSP)", "(Vita)", "(XBOX)", "(X360)", "(XB1)", "(XSX|S)", "(PC)", "(Jaguar)", "(NeoGeo)", "(Arcade)", "(3DO)"]
 YEAR_TAGS = ["(19XX)", "(20XX)"]
@@ -100,10 +118,10 @@ def insert_element_after_runtime(root, tag_name, tag_value):
     if existing is not None:
         existing.text = tag_value
         return existing
-    
+
     # Find runtime element
     runtime_element = root.find("runtime")
-    
+
     if runtime_element is not None:
         # Find the index of runtime element
         runtime_index = list(root).index(runtime_element)
@@ -115,7 +133,7 @@ def insert_element_after_runtime(root, tag_name, tag_value):
         # If no runtime, just append to root
         new_element = ET.SubElement(root, tag_name)
         new_element.text = tag_value
-    
+
     return new_element
 
 def process_nfo_file(nfo_path, tag, fix=False):
@@ -127,15 +145,16 @@ def process_nfo_file(nfo_path, tag, fix=False):
         tree = ET.parse(nfo_path)
         root = tree.getroot()
         messages = []
-        
+
         if tag in PLATFORM_TAGS:
             platform_value = get_platform_from_tag(tag)
             genre_elements = root.findall("genre")
             genre_found = any(g.text == platform_value for g in genre_elements)
-            
+
             if not genre_found:
                 if fix:
                     insert_element_after_runtime(root, "genre", platform_value)
+                    indent_xml(root)
                     tree.write(nfo_path, encoding='utf-8', xml_declaration=True)
                     messages.append(f"✓ FIXED: Added <genre>{platform_value}</genre>")
                     stats["fixed"] += 1
@@ -146,14 +165,15 @@ def process_nfo_file(nfo_path, tag, fix=False):
             else:
                 messages.append(f"✓ FOUND: <genre>{platform_value}</genre>")
                 return True, messages
-                
+
         elif tag in YEAR_TAGS or re.match(r'\(\d{4}\)', tag):
             year_value = extract_year_from_tag(tag)
             year_element = root.find("year")
-            
+
             if year_element is None or year_element.text != year_value:
                 if fix and year_value:
                     insert_element_after_runtime(root, "year", year_value)
+                    indent_xml(root)
                     tree.write(nfo_path, encoding='utf-8', xml_declaration=True)
                     messages.append(f"✓ FIXED: Set <year>{year_value}</year>")
                     stats["fixed"] += 1
@@ -164,14 +184,15 @@ def process_nfo_file(nfo_path, tag, fix=False):
             else:
                 messages.append(f"✓ FOUND: <year>{year_value}</year>")
                 return True, messages
-                
+
         elif tag in REGION_TAGS:
             region_code = extract_region_code(tag)
             country_element = root.find("countrycode")
-            
+
             if country_element is None or country_element.text != region_code:
                 if fix:
                     insert_element_after_runtime(root, "countrycode", region_code)
+                    indent_xml(root)
                     tree.write(nfo_path, encoding='utf-8', xml_declaration=True)
                     messages.append(f"✓ FIXED: Set <countrycode>{region_code}</countrycode>")
                     stats["fixed"] += 1
@@ -182,7 +203,7 @@ def process_nfo_file(nfo_path, tag, fix=False):
             else:
                 messages.append(f"✓ FOUND: <countrycode>{region_code}</countrycode>")
                 return True, messages
-                
+
     except Exception as e:
         return False, [f"✗ ERROR: {str(e)}"]
 
@@ -192,19 +213,20 @@ def check_studio_tag(filename, nfo_path, fix=False):
     Returns True if valid, False otherwise.
     """
     studio_name = extract_studio_from_filename(filename)
-    
+
     if not studio_name:
         stats["missing_studio"] += 1
         return False, f"✗ MISSING STUDIO TAG: No 'by <company>' pattern found in filename"
-    
+
     try:
         tree = ET.parse(nfo_path)
         root = tree.getroot()
         studio_element = root.find("studio")
-        
+
         if studio_element is None or studio_element.text != studio_name:
             if fix:
                 insert_element_after_runtime(root, "studio", studio_name)
+                indent_xml(root)
                 tree.write(nfo_path, encoding='utf-8', xml_declaration=True)
                 stats["fixed"] += 1
                 return True, f"✓ FIXED: Set <studio>{studio_name}</studio>"
@@ -212,7 +234,7 @@ def check_studio_tag(filename, nfo_path, fix=False):
                 return False, f"✗ MISSING: <studio>{studio_name}</studio>"
         else:
             return True, f"✓ FOUND: <studio>{studio_name}</studio>"
-            
+
     except Exception as e:
         return False, f"✗ ERROR: {str(e)}"
 
@@ -240,14 +262,14 @@ def main():
 
     # Iterate through all .nfo files
     nfo_files = list(folder_path.glob('*.nfo'))
-    
+
     if not nfo_files:
         print(f"No .nfo files found in {folder_path}")
         return
 
     for nfo_file in sorted(nfo_files):
         filename_base = nfo_file.stem  # filename without .nfo extension
-        
+
         # Filter by tag if it's in the filename (except for studio)
         if args.tag != "studio" and args.tag not in filename_base:
             continue
