@@ -24,13 +24,11 @@ def indent_xml(elem, level=0):
 
 # Constants for valid tags
 PLATFORM_TAGS = ["(NES)", "(SNES)", "(N64)", "(GCN)", "(NSW)", "(NS2)", "(GB)", "(GBC)", "(GBA)", "(NDS)", "(3DS)", "(Genesis)", "(Saturn)", "(Dreamcast)", "(PSX)", "(PS2)", "(PS3)", "(PS4)", "(PS5)", "(PSP)", "(Vita)", "(XBOX)", "(X360)", "(XB1)", "(XBS)", "(PC)", "(Jaguar)", "(NeoGeo)", "(Arcade)", "(3DO)"]
-YEAR_TAGS = ["(19XX)", "(20XX)"]
 REGION_TAGS = ["(U)", "(UK)", "(A)", "(NZ)", "(E)", "(K)", "(J)"]
 
 # Tag to XML element mapping
 TAG_TO_ELEMENT = {
     "platform": PLATFORM_TAGS,
-    "year": YEAR_TAGS,
     "countrycode": REGION_TAGS,
 }
 
