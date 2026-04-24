@@ -262,7 +262,7 @@ def check_year_tag(filename, nfo_path, fix=False):
 
 def main():
     parser = argparse.ArgumentParser(description='Manage Jellyfin .nfo files.')
-    parser.add_argument('-t', '--tag', help='Tag to validate or update (e.g., "(SNES)", "(2022)", "(U)"). Omit to check only general tags')
+    parser.add_argument('-t', '--tag', help='Tag to validate or update (e.g., "(SNES)", "(U)"). Omit to check only general tags')
     parser.add_argument('--fix', action='store_true', help='Automatically fix missing tags.')
     parser.add_argument('folder', help='Path to the folder containing .nfo files.')
     args = parser.parse_args()
