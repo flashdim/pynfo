@@ -49,7 +49,6 @@ python pynfo.py [OPTIONS] <folder>
 
 ### Options
 
-- `-t, --tag <TAG>`: Specify a tag to validate (e.g., `(SNES)`, `(2022)`, `(U)`) or use `studio` to check studio tags
 - `--fix`: Enable auto-fix mode (modifies NFO files). Without this flag, the script runs in read-only mode
 - `folder`: Path to the folder containing .nfo files
 
@@ -60,19 +59,9 @@ python pynfo.py [OPTIONS] <folder>
 python pynfo.py /path/to/nfo_files
 ```
 
-**Validate a specific platform tag:**
+**Validate and auto-fix:**
 ```bash
-python pynfo.py --tag "(SNES)" /path/to/nfo_files
-```
-
-**Validate and auto-fix missing year tags:**
-```bash
-python pynfo.py --tag "(2023)" --fix /path/to/nfo_files
-```
-
-**Validate region codes and auto-fix:**
-```bash
-python pynfo.py --tag "(J)" --fix /path/to/nfo_files
+python pynfo.py --fix /path/to/nfo_files
 ```
 
 ## Supported Tags
