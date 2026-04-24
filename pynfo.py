@@ -25,6 +25,7 @@ def indent_xml(elem, level=0):
 # Constants for valid tags
 PLATFORM_TAGS = ["(NES)", "(SNES)", "(N64)", "(GCN)", "(Wii)", "(Wii U)", "(NSW)", "(NS2)", "(GB)", "(GBC)", "(GBA)", "(NDS)", "(3DS)", "(Genesis)", "(Saturn)", "(Dreamcast)", "(PSX)", "(PS2)", "(PS3)", "(PS4)", "(PS5)", "(PSP)", "(Vita)", "(XBOX)", "(X360)", "(XB1)", "(XBS)", "(PC)", "(Jaguar)", "(NeoGeo)", "(Arcade)", "(3DO)"]
 REGION_TAGS = ["(U)", "(UK)", "(A)", "(NZ)", "(E)", "(K)", "(J)"]
+ALL_TAGS = PLATFORM_TAGS + REGION_TAGS
 
 # Tag to XML element mapping
 TAG_TO_ELEMENT = {
@@ -95,6 +96,13 @@ def extract_year_from_filename(filename):
     match = re.search(r'\((\d{4})\)', filename)
     if match:
         return match.group(1)
+    return None
+
+def extract_tags_from_filename(filename):
+    """Extract all tags value from filename."""
+    match = re.findall(r"\([^()]*\)", filename)
+    if match:
+        return match
     return None
 
 def extract_region_code(tag):
@@ -262,25 +270,14 @@ def check_year_tag(filename, nfo_path, fix=False):
 
 def main():
     parser = argparse.ArgumentParser(description='Manage Jellyfin .nfo files.')
-    parser.add_argument('-t', '--tag', help='Tag to validate or update (e.g., "(SNES)", "(U)"). Omit to check only general tags')
     parser.add_argument('--fix', action='store_true', help='Automatically fix missing tags.')
     parser.add_argument('folder', help='Path to the folder containing .nfo files.')
     args = parser.parse_args()
-
-    # If no tag specified, check general tags for all files
-    if not args.tag:
-        args.tag = "general"
 
     folder_path = Path(args.folder)
     if not folder_path.is_dir():
         print(f"Error: {args.folder} is not a valid directory.")
         return
-
-    print(f"\n{'='*80}")
-    print(f"Processing NFO files in: {folder_path.absolute()}")
-    print(f"Tag: {args.tag}")
-    print(f"Fix mode: {'ENABLED' if args.fix else 'DISABLED (read-only)'}")
-    print(f"{'='*80}\n")
 
     # Iterate through all .nfo files
     nfo_files = list(folder_path.glob('*.nfo'))
@@ -291,10 +288,6 @@ def main():
 
     for nfo_file in sorted(nfo_files):
         filename_base = nfo_file.stem  # filename without .nfo extension
-
-        # Filter by tag if it's in the filename (except for general)
-        if args.tag != "general" and args.tag not in filename_base:
-            continue
 
         stats["processed"] += 1
         print(f"\n[{stats['processed']}] {nfo_file.name}")
@@ -312,13 +305,20 @@ def main():
         if not success:
             failed = True
 
-        # Validate argument tags
-        success, messages = process_nfo_file(str(nfo_file), args.tag, fix=args.fix)
-        for msg in messages:
-            print(f"  {msg}")
-        if not success:
-            failed = True
+        # Get all parenthetical tags
+        filename_tags = extract_tags_from_filename(filename_base)
 
+        # Validate platform and region tags
+        for tag in filename_tags:
+            # Ignore tags we don't use'
+            if tag in ALL_TAGS:
+                success, messages = process_nfo_file(str(nfo_file), tag, fix=args.fix)
+                for msg in messages:
+                    print(f"  {msg}")
+                if not success:
+                    failed = True
+
+        # Tally success/fail
         if failed:
             stats["failed"] += 1
         else:
@@ -326,15 +326,16 @@ def main():
 
     # Print detailed report
     print(f"\n{'='*80}")
-    print(f"DETAILED REPORT")
+    print(f"Processing NFO files in: {folder_path.absolute()}")
+    print(f"Fix mode: {'ENABLED' if args.fix else 'DISABLED (read-only)'}")
     print(f"{'='*80}")
     print(f"Files processed:  {stats['processed']}")
-    print(f"Passed:           {stats['passed']}")
-    print(f"Failed:           {stats['failed']}")
-    print(f"Fixed:            {stats['fixed']}")
-    if args.tag == "general":
-        print(f"Missing studio:   {stats['missing_studio']}")
-        print(f"Missing year:     {stats['missing_year']}")
+    print(f"Files Passed:     {stats['passed']}")
+    print(f"Files Failed:     {stats['failed']}")
+    print(f"Tags Fixed:       {stats['fixed']}")
+    print(f"{'-'*10}FILENAME AUDIT{'-'*10}")
+    print(f"Missing studio:   {stats['missing_studio']}")
+    print(f"Missing year:     {stats['missing_year']}")
     print(f"{'='*80}\n")
 
 if __name__ == '__main__':
