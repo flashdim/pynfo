@@ -121,7 +121,7 @@ def extract_region_code(tag):
 def insert_element_after_runtime(root, tag_name, tag_value):
     """
     Insert a new element after the runtime element.
-    If the element already exists, update it instead.
+    If missing the runtime element, just append it to the root element.
     """
     # Allow multiple <genre> tags
     if tag_name == "genre":
