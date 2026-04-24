@@ -1,9 +1,9 @@
 # Usage Documentation for nfo_manager.py
 
-This document provides detailed instructions on how to use the `nfo_manager.py` script.
+This document provides detailed instructions on how to use the `pynfo.py` script.
 
 ## Overview
-The `nfo_manager.py` script is designed to manage NFO files, which are commonly used for storing metadata about media files. This script allows users to create, edit, and delete NFO files efficiently.
+The `pynfo.py` script is designed to manage NFO files, which are commonly used for storing metadata about media files. This script allows users to create, edit, and delete NFO files efficiently.
 
 ## Getting Started
 ### Prerequisites
@@ -18,7 +18,7 @@ The `nfo_manager.py` script is designed to manage NFO files, which are commonly 
 #### 1. Running the Script
 To run the script, use the following command:
 ```bash
-python nfo_manager.py [options]
+python pynfo.py [options]
 ```
 
 #### 2. Options
@@ -30,15 +30,15 @@ python nfo_manager.py [options]
 ### Examples
 #### Creating a new NFO file
 ```bash
-python nfo_manager.py --create myfile.nfo
+python pynfo.py --create myfile.nfo
 ```
 #### Editing an existing NFO file
 ```bash
-python nfo_manager.py --edit myfile.nfo
+python pynfo.py --edit myfile.nfo
 ```
 #### Deleting an NFO file
 ```bash
-python nfo_manager.py --delete myfile.nfo
+python pynfo.py --delete myfile.nfo
 ```
 
 ## Troubleshooting
