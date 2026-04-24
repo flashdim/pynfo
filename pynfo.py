@@ -23,7 +23,7 @@ def indent_xml(elem, level=0):
             elem.tail = indent_str
 
 # Constants for valid tags
-PLATFORM_TAGS = ["(NES)", "(SNES)", "(N64)", "(GCN)", "(NSW)", "(NS2)", "(GB)", "(GBC)", "(GBA)", "(NDS)", "(3DS)", "(Genesis)", "(Saturn)", "(Dreamcast)", "(PSX)", "(PS2)", "(PS3)", "(PS4)", "(PS5)", "(PSP)", "(Vita)", "(XBOX)", "(X360)", "(XB1)", "(XBS)", "(PC)", "(Jaguar)", "(NeoGeo)", "(Arcade)", "(3DO)"]
+PLATFORM_TAGS = ["(NES)", "(SNES)", "(N64)", "(GCN)", "(Wii)", "(Wii U)", "(NSW)", "(NS2)", "(GB)", "(GBC)", "(GBA)", "(NDS)", "(3DS)", "(Genesis)", "(Saturn)", "(Dreamcast)", "(PSX)", "(PS2)", "(PS3)", "(PS4)", "(PS5)", "(PSP)", "(Vita)", "(XBOX)", "(X360)", "(XB1)", "(XBS)", "(PC)", "(Jaguar)", "(NeoGeo)", "(Arcade)", "(3DO)"]
 REGION_TAGS = ["(U)", "(UK)", "(A)", "(NZ)", "(E)", "(K)", "(J)"]
 
 # Tag to XML element mapping
@@ -59,6 +59,8 @@ def get_platform_from_tag(tag):
         "(SNES)": "Nintendo SNES",
         "(N64)": "Nintendo 64",
         "(GCN)": "Nintendo GameCube",
+        "(Wii)": "Nintendo Wii",
+        "(Wii U)": "Nintendo Wii U",
         "(NSW)": "Nintendo Switch",
         "(NS2)": "Nintendo Switch 2",
         "(GB)": "Nintendo Game Boy",
@@ -298,22 +300,24 @@ def main():
         print(f"\n[{stats['processed']}] {nfo_file.name}")
         failed = False
 
-        if args.tag == "general":
-            success, message = check_studio_tag(filename_base, str(nfo_file), fix=args.fix)
-            print(f"  {message}")
-            if not success:
-                failed = True
+        # Validate studio tag
+        success, message = check_studio_tag(filename_base, str(nfo_file), fix=args.fix)
+        print(f"  {message}")
+        if not success:
+            failed = True
 
-            success, message = check_year_tag(filename_base, str(nfo_file), fix=args.fix)
-            print(f"  {message}")
-            if not success:
-                failed = True
-        else:
-            success, messages = process_nfo_file(str(nfo_file), args.tag, fix=args.fix)
-            for msg in messages:
-                print(f"  {msg}")
-            if not success:
-                failed = True
+        # Validate year tag
+        success, message = check_year_tag(filename_base, str(nfo_file), fix=args.fix)
+        print(f"  {message}")
+        if not success:
+            failed = True
+
+        # Validate argument tags
+        success, messages = process_nfo_file(str(nfo_file), args.tag, fix=args.fix)
+        for msg in messages:
+            print(f"  {msg}")
+        if not success:
+            failed = True
 
         if failed:
             stats["failed"] += 1
