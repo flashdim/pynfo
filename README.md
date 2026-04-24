@@ -101,10 +101,6 @@ Game Title by Developer Name - Other Info.nfo
 
 Example: `The Legend of Zelda by Nintendo - (SNES) (1992) (U).nfo`
 
-## For More Information
-
-See [USAGE.md](USAGE.md) for detailed usage documentation.
-
 ## License
 
 MIT License - see the [LICENSE](LICENSE) file for details.
