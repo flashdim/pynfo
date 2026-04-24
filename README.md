@@ -44,7 +44,7 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 Basic syntax:
 ```bash
-python nfo_manager.py [OPTIONS] <folder>
+python pynfo.py [OPTIONS] <folder>
 ```
 
 ### Options
@@ -57,22 +57,22 @@ python nfo_manager.py [OPTIONS] <folder>
 
 **Check for studio tags (read-only):**
 ```bash
-python nfo_manager.py /path/to/nfo_files
+python pynfo.py /path/to/nfo_files
 ```
 
 **Validate a specific platform tag:**
 ```bash
-python nfo_manager.py --tag "(SNES)" /path/to/nfo_files
+python pynfo.py --tag "(SNES)" /path/to/nfo_files
 ```
 
 **Validate and auto-fix missing year tags:**
 ```bash
-python nfo_manager.py --tag "(2023)" --fix /path/to/nfo_files
+python pynfo.py --tag "(2023)" --fix /path/to/nfo_files
 ```
 
 **Validate region codes and auto-fix:**
 ```bash
-python nfo_manager.py --tag "(J)" --fix /path/to/nfo_files
+python pynfo.py --tag "(J)" --fix /path/to/nfo_files
 ```
 
 ## Supported Tags
